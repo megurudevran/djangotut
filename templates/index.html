@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Django Atölyesi</title>
+	<style>
+		:root {
+			color-scheme: light;
+			--ink: #202b27;
+			--muted: #66716b;
+			--paper: #f5f7f2;
+			--surface: #fff;
+			--line: #dce4dc;
+			--green: #176d50;
+			--green-soft: #e3f1e9;
+			--coral: #dc674f;
+			--yellow: #f1c85b;
+			font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+		}
+		* { box-sizing: border-box; }
+		body { margin: 0; background: var(--paper); color: var(--ink); }
+		button { font: inherit; }
+		.topbar { height: 68px; display: flex; align-items: center; justify-content: space-between; padding: 0 5vw; border-bottom: 1px solid var(--line); background: var(--surface); }
+		.brand { display: flex; align-items: center; gap: 11px; font-weight: 800; letter-spacing: .02em; }
+		.brand-mark { display: grid; place-items: center; width: 34px; height: 34px; background: var(--green); color: white; border-radius: 9px; font-family: Georgia, serif; font-size: 20px; }
+		.top-note { color: var(--muted); font-size: 13px; }
+		.shell { width: min(1180px, 92vw); margin: 48px auto 72px; }
+		.intro { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 30px; }
+		.eyebrow { color: var(--green); font-size: 12px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+		h1 { margin: 10px 0 8px; font: 700 clamp(32px, 4vw, 48px)/1.05 Georgia, "Times New Roman", serif; letter-spacing: 0; }
+		.intro p { margin: 0; color: var(--muted); line-height: 1.6; }
+		.progress-box { min-width: 220px; padding: 15px 17px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+		.progress-label { display: flex; justify-content: space-between; gap: 18px; font-size: 13px; font-weight: 700; }
+		.progress-track { height: 7px; margin-top: 12px; overflow: hidden; background: #e8ece7; border-radius: 8px; }
+		.progress-fill { width: 0; height: 100%; background: var(--green); transition: width .25s ease; }
+		.workspace { display: grid; grid-template-columns: 270px minmax(0, 1fr); gap: 24px; align-items: start; }
+		.sidebar, .lesson-card, .quiz { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+		.sidebar { padding: 19px 14px; }
+		.sidebar h2 { margin: 0 10px 14px; color: var(--muted); font-size: 11px; letter-spacing: .11em; text-transform: uppercase; }
+		.lesson-nav { display: grid; gap: 5px; }
+		.lesson-tab { display: grid; grid-template-columns: 33px 1fr; align-items: center; gap: 10px; width: 100%; padding: 11px 10px; border: 0; border-radius: 6px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
+		.lesson-tab:hover { background: #f3f6f2; }
+		.lesson-tab[aria-current="step"] { background: var(--green-soft); color: #135a42; }
+		.lesson-number { display: grid; place-items: center; width: 29px; height: 29px; border: 1px solid var(--line); border-radius: 50%; color: var(--muted); font-size: 12px; font-weight: 700; }
+		.lesson-tab[aria-current="step"] .lesson-number { border-color: var(--green); background: var(--green); color: white; }
+		.lesson-tab.is-done .lesson-number { border-color: var(--green); color: var(--green); }
+		.lesson-name { font-size: 13px; font-weight: 700; }
+		.lesson-time { display: block; margin-top: 3px; color: var(--muted); font-size: 11px; font-weight: 400; }
+		.lesson-card { min-height: 482px; padding: clamp(22px, 4vw, 40px); }
+		.lesson-panel[hidden] { display: none; }
+		.lesson-kicker { color: var(--coral); font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+		h2 { letter-spacing: 0; }
+		.lesson-panel h2 { margin: 10px 0; font: 700 30px/1.15 Georgia, "Times New Roman", serif; }
+		.lesson-panel > p { max-width: 680px; color: var(--muted); line-height: 1.75; }
+		.flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 24px 0; }
+		.flow-step { position: relative; min-height: 88px; padding: 15px; border: 1px solid var(--line); border-radius: 7px; background: #fbfcfa; }
+		.flow-step b { display: block; margin-bottom: 6px; color: var(--green); font-family: Georgia, serif; font-size: 20px; }
+		.flow-step span { color: var(--muted); font-size: 12px; }
+		.code-label { margin: 22px 0 8px; color: var(--muted); font-size: 11px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+		pre { overflow-x: auto; margin: 0; padding: 18px; border-radius: 7px; background: #202b27; color: #eef6ed; font: 13px/1.7 Consolas, "Courier New", monospace; }
+		.code-comment { color: #a9cdb6; }
+		.lesson-footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 25px; padding-top: 19px; border-top: 1px solid var(--line); }
+		.lesson-footer p { margin: 0; color: var(--muted); font-size: 12px; }
+		.complete-button { padding: 10px 14px; border: 1px solid var(--green); border-radius: 6px; background: var(--green); color: white; font-size: 13px; font-weight: 700; cursor: pointer; }
+		.complete-button:hover { background: #10573f; }
+		.complete-button.is-done { background: white; color: var(--green); }
+		.quiz { display: grid; grid-template-columns: minmax(180px, .75fr) 2fr; gap: 22px; margin-top: 24px; padding: 21px 24px; }
+		.quiz-heading { display: flex; gap: 12px; align-items: center; }
+		.quiz-icon { display: grid; flex: 0 0 38px; place-items: center; width: 38px; height: 38px; border-radius: 8px; background: #fff4cf; color: #705510; font-weight: 900; }
+		.quiz h2 { margin: 0; font-size: 15px; }
+		.quiz small { display: block; margin-top: 4px; color: var(--muted); }
+		.quiz-question { margin: 0 0 11px; font-size: 14px; font-weight: 700; }
+		.answers { display: flex; flex-wrap: wrap; gap: 8px; }
+		.answer { padding: 9px 12px; border: 1px solid var(--line); border-radius: 6px; background: white; color: var(--ink); cursor: pointer; }
+		.answer:hover { border-color: var(--green); }
+		.answer.correct { border-color: var(--green); background: var(--green-soft); color: #135a42; }
+		.answer.incorrect { border-color: var(--coral); background: #fff0ec; color: #a33f2d; }
+		.quiz-feedback { min-height: 18px; margin: 9px 0 0; color: var(--muted); font-size: 12px; }
+		@media (max-width: 760px) {
+			.shell { margin-top: 32px; }
+			.intro { align-items: stretch; flex-direction: column; }
+			.progress-box { width: 100%; }
+			.workspace { grid-template-columns: 1fr; }
+			.sidebar { padding: 14px; }
+			.lesson-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+			.lesson-card { min-height: 0; }
+			.quiz { grid-template-columns: 1fr; gap: 15px; }
+		}
+		@media (max-width: 450px) {
+			.topbar { padding: 0 4vw; }
+			.top-note { font-size: 11px; }
+			.shell { width: 92vw; }
+			.lesson-nav { grid-template-columns: 1fr; }
+			.flow { grid-template-columns: 1fr; }
+			.flow-step { min-height: 0; }
+			.lesson-footer { align-items: flex-start; flex-direction: column; }
+			.answers { flex-direction: column; }
+			.answer { text-align: left; }
+		}
+	</style>
+</head>
+<body>
+	<header class="topbar">
+		<div class="brand"><span class="brand-mark">D</span><span>Django Atölyesi</span></div>
+		<span class="top-note">Başlangıç rotası · 4 kısa ders</span>
+	</header>
+	<main class="shell">
+		<section class="intro" aria-labelledby="page-title">
+			<div>
+				<div class="eyebrow">Birlikte inşa et</div>
+				<h1 id="page-title">Django'ya ilk adımın.</h1>
+				<p>İstekten çalışan bir sayfaya: temel parçaları sırayla öğren.</p>
+			</div>
+			<div class="progress-box" aria-live="polite">
+				<div class="progress-label"><span>Öğrenme ilerlemesi</span><span id="progress-count">0 / 4</span></div>
+				<div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+			</div>
+		</section>
+
+		<div class="workspace">
+			<aside class="sidebar" aria-label="Dersler">
+				<h2>Başlangıç rotası</h2>
+				<nav class="lesson-nav">
+					<button class="lesson-tab" type="button" data-lesson="1" aria-current="step"><span class="lesson-number">01</span><span class="lesson-name">Django nedir?<small class="lesson-time">3 dakika</small></span></button>
+					<button class="lesson-tab" type="button" data-lesson="2"><span class="lesson-number">02</span><span class="lesson-name">URL ve view<small class="lesson-time">5 dakika</small></span></button>
+					<button class="lesson-tab" type="button" data-lesson="3"><span class="lesson-number">03</span><span class="lesson-name">Template ve veri<small class="lesson-time">4 dakika</small></span></button>
+					<button class="lesson-tab" type="button" data-lesson="4"><span class="lesson-number">04</span><span class="lesson-name">Model ve veritabanı<small class="lesson-time">5 dakika</small></span></button>
+				</nav>
+			</aside>
+
+			<section class="lesson-card" aria-live="polite">
+				<article class="lesson-panel" data-panel="1">
+					<div class="lesson-kicker">Ders 01 · Temeller</div>
+					<h2>Django, web uygulamanın iskeletidir.</h2>
+					<p>Django; URL'leri, Python kodunu, HTML şablonlarını ve veritabanını bir arada çalıştıran bir web çatısıdır. Tarayıcı bir istek gönderir; Django bu isteği doğru koda ulaştırıp bir yanıt üretir.</p>
+					<div class="flow" aria-label="İstekten yanıta akış">
+						<div class="flow-step"><b>01 · URL</b><span>İsteğin hangi adrese geldiğini bulur.</span></div>
+						<div class="flow-step"><b>02 · View</b><span>Ne yapılacağına karar veren Python kodu.</span></div>
+						<div class="flow-step"><b>03 · Yanıt</b><span>HTML sayfası veya başka bir sonuç.</span></div>
+					</div>
+					<p>Bu projede ana adres, <code>ogrenme</code> uygulamasına yönlenir; uygulamadaki view ise <code>index.html</code> şablonunu gösterir.</p>
+				</article>
+
+				<article class="lesson-panel" data-panel="2" hidden>
+					<div class="lesson-kicker">Ders 02 · İstek yönlendirme</div>
+					<h2>URL, doğru view'ı bulur.</h2>
+					<p>URL yapılandırmasında bir adresi view fonksiyonuna eşlersin. View, isteği alır ve bir HTTP yanıtı döndürür. Django'da bu eşleşme genellikle uygulamanın <code>urls.py</code> dosyasında tutulur.</p>
+					<div class="code-label">ogrenme/url.py</div>
+					<pre><code>from django.urls import path
+from . import views
+
+urlpatterns = [
+		path("", views.index, name="index"),
+]</code></pre>
+					<div class="code-label">ogrenme/views.py</div>
+					<pre><code>from django.shortcuts import render
+
+def index(request):
+		return render(request, "index.html")</code></pre>
+					<p>Tarayıcı ana adresi istediğinde Django <code>index</code> fonksiyonunu çalıştırır.</p>
+				</article>
+
+				<article class="lesson-panel" data-panel="3" hidden>
+					<div class="lesson-kicker">Ders 03 · HTML üretimi</div>
+					<h2>View veriyi template'e taşır.</h2>
+					<p>Şablon, HTML ile Python verisini birleştirir. View içinden sözlük biçiminde gönderdiğin değerleri çift süslü parantezle ekrana yazdırabilirsin.</p>
+					<div class="code-label">ogrenme/views.py</div>
+					<pre><code>def selamla(request):
+		context = {"isim": "Django öğrencisi"}
+		return render(request, "selam.html", context)</code></pre>
+					<div class="code-label">templates/selam.html</div>
+					<pre><code>&lt;h1&gt;Merhaba, {{ isim }}!&lt;/h1&gt;</code></pre>
+					<p>Şablon etiketleriyle listeler üzerinde dönebilir veya koşullara göre içerik gösterebilirsin.</p>
+				</article>
+
+				<article class="lesson-panel" data-panel="4" hidden>
+					<div class="lesson-kicker">Ders 04 · Veri saklama</div>
+					<h2>Model, verinin şeklini tanımlar.</h2>
+					<p>Bir model Python sınıfıdır; alanları veritabanındaki sütunlara karşılık gelir. Modeli değiştirdikten sonra migration dosyalarını üretir ve veritabanına uygularsın.</p>
+					<div class="code-label">ogrenme/models.py</div>
+					<pre><code>from django.db import models
+
+class Not(models.Model):
+		baslik = models.CharField(max_length=120)
+		olusturma = models.DateTimeField(auto_now_add=True)</code></pre>
+					<div class="code-label">Terminal</div>
+					<pre><code>python manage.py makemigrations
+python manage.py migrate</code></pre>
+					<p><code>makemigrations</code> değişiklik tarifini oluşturur; <code>migrate</code> bunu veritabanına uygular.</p>
+				</article>
+
+				<div class="lesson-footer">
+					<p id="lesson-hint">Dersi bitirince ilerlemeni kaydet.</p>
+					<button class="complete-button" id="complete-button" type="button">Dersi tamamladım</button>
+				</div>
+			</section>
+		</div>
+
+		<section class="quiz" aria-labelledby="quiz-title">
+			<div class="quiz-heading">
+				<span class="quiz-icon" aria-hidden="true">?</span>
+				<div><h2 id="quiz-title">Hızlı kontrol</h2><small>Tek soruda pekiştir</small></div>
+			</div>
+			<div>
+				<p class="quiz-question">Bir URL isteğini karşılayıp yanıt oluşturan Django parçası hangisidir?</p>
+				<div class="answers">
+					<button class="answer" type="button" data-correct="false">Model</button>
+					<button class="answer" type="button" data-correct="true">View</button>
+					<button class="answer" type="button" data-correct="false">Migration</button>
+				</div>
+				<p class="quiz-feedback" id="quiz-feedback" aria-live="polite"></p>
+			</div>
+		</section>
+	</main>
+	<script>
+		const lessonTabs = [...document.querySelectorAll(".lesson-tab")];
+		const lessonPanels = [...document.querySelectorAll(".lesson-panel")];
+		const completeButton = document.querySelector("#complete-button");
+		const completedLessons = new Set(JSON.parse(localStorage.getItem("django-atolye-progress") || "[]"));
+		let activeLesson = "1";
+
+		function updateProgress() {
+			const count = completedLessons.size;
+			document.querySelector("#progress-count").textContent = `${count} / 4`;
+			document.querySelector("#progress-fill").style.width = `${count * 25}%`;
+			lessonTabs.forEach((tab) => tab.classList.toggle("is-done", completedLessons.has(tab.dataset.lesson)));
+			const isDone = completedLessons.has(activeLesson);
+			completeButton.classList.toggle("is-done", isDone);
+			completeButton.textContent = isDone ? "Tamamlandı · Geri al" : "Dersi tamamladım";
+			document.querySelector("#lesson-hint").textContent = isDone ? "İlerlemen bu tarayıcıda kaydedildi." : "Dersi bitirince ilerlemeni kaydet.";
+		}
+
+		lessonTabs.forEach((tab) => tab.addEventListener("click", () => {
+			activeLesson = tab.dataset.lesson;
+			lessonTabs.forEach((item) => item.removeAttribute("aria-current"));
+			tab.setAttribute("aria-current", "step");
+			lessonPanels.forEach((panel) => { panel.hidden = panel.dataset.panel !== activeLesson; });
+			updateProgress();
+		}));
+
+		completeButton.addEventListener("click", () => {
+			if (completedLessons.has(activeLesson)) completedLessons.delete(activeLesson);
+			else completedLessons.add(activeLesson);
+			localStorage.setItem("django-atolye-progress", JSON.stringify([...completedLessons]));
+			updateProgress();
+		});
+
+		document.querySelectorAll(".answer").forEach((answer) => answer.addEventListener("click", () => {
+			document.querySelectorAll(".answer").forEach((option) => option.classList.remove("correct", "incorrect"));
+			const correct = answer.dataset.correct === "true";
+			answer.classList.add(correct ? "correct" : "incorrect");
+			document.querySelector("#quiz-feedback").textContent = correct
+				? "Doğru. View, isteği işler ve yanıtı döndürür."
+				: "Tekrar dene. URL'den sonra isteği karşılayan parçayı düşün.";
+		}));
+
+		updateProgress();
+	</script>
+</body>
+</html>
